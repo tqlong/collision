@@ -3,13 +3,15 @@
 
 #include "ball.h"
 
-enum EventType {
+enum EventType
+{
     DRAW_EVENT,
     VERTICAL_COLLISION_EVENT,
     HORIZONTAL_COLLISION_EVENT,
 };
 
-struct Event {
+struct Event
+{
     enum EventType type;
     double t;
     struct Ball *a;
@@ -22,7 +24,8 @@ int isInvalid(struct Event e);
 
 #define QUEUE_CAPACITY 100000
 
-struct EventQueue {
+struct EventQueue
+{
     struct Event *events;
     int n;
 };

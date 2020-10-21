@@ -4,7 +4,8 @@
 #include <SDL2/SDL.h>
 #include "event_queue.h"
 
-struct System {
+struct System
+{
     struct Ball balls[100];
     int n;
 };

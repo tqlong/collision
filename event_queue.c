@@ -53,7 +53,8 @@ void exch(struct EventQueue* q, int i, int j)
 
 void swim(struct EventQueue* q, int i)
 {
-    while (i > 0) {
+    while (i > 0)
+    {
         int r = (i-1) / 2;
         if (q->events[r].t <= q->events[i].t) break;
         exch(q, i, r);
@@ -63,7 +64,8 @@ void swim(struct EventQueue* q, int i)
 
 void sink(struct EventQueue* q, int i)
 {
-    while (i*2+1 < q->n) {
+    while (i*2+1 < q->n)
+    {
         int r = i*2+1;
         if (r+1 < q->n && q->events[r].t > q->events[r+1].t) ++r;
         if (q->events[i].t <= q->events[r].t) break;
