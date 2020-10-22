@@ -72,7 +72,7 @@ void processBallCollistionEvent(struct System* s, struct EventQueue* q, struct E
 
 void mainLoop(SDL_Window* window, SDL_Renderer* renderer)
 {
-    int n = 100;
+    int n = 50;
     double t = 0;
     struct System s;
     struct EventQueue q;

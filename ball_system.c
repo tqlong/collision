@@ -11,7 +11,7 @@ void initSystem(struct System* s, int n)
     {
         s->balls[i].x = (double) rand() / RAND_MAX * 0.8 + 0.1;
         s->balls[i].y = (double) rand() / RAND_MAX * 0.8 + 0.1;
-        s->balls[i].weight = 1.0;
+        s->balls[i].weight = (double) rand() / RAND_MAX * 1.0 + 0.5;
         s->balls[i].vx = (double) rand() / RAND_MAX * 0.1 + 0.1;
         s->balls[i].vy = (double) rand() / RAND_MAX * 0.1 + 0.1;
         if (rand() % 2 == 0) s->balls[i].vx = -s->balls[i].vx;
