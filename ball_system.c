@@ -42,11 +42,13 @@ void step(struct System *s, double dt)
     }
 }
 
-void predictBall(double t, struct System* s, struct EventQueue* q, struct Ball* ball)
+struct Event getVerticalCollisionEvent(double t, struct Ball* ball)
 {
+    struct Event e;
     double dt;
     double radius = ball->weight * 20 / SCREEN_SIZE;
 
+    // vertical wall events
     if (ball->vx < 0)
     {
         dt = (radius - ball->x) / ball->vx;
@@ -55,8 +57,21 @@ void predictBall(double t, struct System* s, struct EventQueue* q, struct Ball* 
     {
         dt = (1 - radius - ball->x) / ball->vx;
     }
-    addVerticalCollisionEvent(q, t+dt, ball);
 
+    e.type = VERTICAL_COLLISION_EVENT;
+    e.t = t+dt;
+    e.a = ball;
+    e.b = NULL;
+    e.count = ball->count;
+    return e;
+}
+
+struct Event getHorizontalCollisionEvent(double t, struct Ball* ball)
+{
+    struct Event e;
+    double dt;
+    double radius = ball->weight * 20 / SCREEN_SIZE;
+    // horizontal wall events
     if (ball->vy < 0)
     {
         dt = (radius - ball->y) / ball->vy;
@@ -65,7 +80,52 @@ void predictBall(double t, struct System* s, struct EventQueue* q, struct Ball* 
     {
         dt = (1 - radius - ball->y) / ball->vy;
     }
-    addHorizontalCollisionEvent(q, t+dt, ball);
+
+    e.type = HORIZONTAL_COLLISION_EVENT;
+    e.t = t+dt;
+    e.a = ball;
+    e.b = NULL;
+    e.count = ball->count;
+    return e;
+}
+
+
+struct Event getCollisionEvent(double t, struct Ball* a, struct Ball* b)
+{
+    struct Event e;
+    double dt;
+
+    e.type = NONE_EVENT;
+    e.t = t;
+    e.a = a;
+    e.b = b;
+    e.count = a->count + b->count;
+
+    if (a == b) return e;
+    dt = -1;//getCollisionTime(a, b);
+    if (dt >= 0)
+    {
+        e.type = BALL_COLLISION_EVENT;
+        e.t += dt;
+    }
+    return e;
+}
+
+void predictBall(double t, struct System* s, struct EventQueue* q, struct Ball* ball)
+{
+
+    addToMinPQ(q, getVerticalCollisionEvent(t, ball));
+
+    addToMinPQ(q, getHorizontalCollisionEvent(t, ball));
+
+    // ball collision events
+    for (int i = 0; i < s->n; i++)
+    {
+        struct Event e = getCollisionEvent(t, ball, &s->balls[i]);
+        if (e.type == BALL_COLLISION_EVENT)
+            addToMinPQ(q, e);
+    }
+
 }
 
 void predictSystem(double t, struct System* s, struct EventQueue* q)

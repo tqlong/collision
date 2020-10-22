@@ -71,6 +71,8 @@ void mainLoop(SDL_Window* window, SDL_Renderer* renderer)
         case HORIZONTAL_COLLISION_EVENT:
             processHorizontalCollisionEvent(&s, &q, e);
             break;
+        default:
+            break;
         }
         t = e.t;
     }

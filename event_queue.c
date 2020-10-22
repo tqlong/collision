@@ -13,6 +13,7 @@ void addDrawEvent(struct EventQueue* q, double t)
     e.type = DRAW_EVENT;
     e.t = t;
     e.a = NULL;
+    e.b = NULL;
     e.count = 0;
     addToMinPQ(q, e);
 }
@@ -23,6 +24,7 @@ void addVerticalCollisionEvent(struct EventQueue* q, double t, struct Ball* ball
     e.type = VERTICAL_COLLISION_EVENT;
     e.t = t;
     e.a = ball;
+    e.b = NULL;
     e.count = ball->count;
     addToMinPQ(q, e);
 }
@@ -33,6 +35,7 @@ void addHorizontalCollisionEvent(struct EventQueue* q, double t, struct Ball* ba
     e.type = HORIZONTAL_COLLISION_EVENT;
     e.t = t;
     e.a = ball;
+    e.b = NULL;
     e.count = ball->count;
     addToMinPQ(q, e);
 }

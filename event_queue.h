@@ -8,13 +8,16 @@ enum EventType
     DRAW_EVENT,
     VERTICAL_COLLISION_EVENT,
     HORIZONTAL_COLLISION_EVENT,
+    BALL_COLLISION_EVENT,
+    NONE_EVENT,
 };
 
 struct Event
 {
     enum EventType type;
     double t;
-    struct Ball *a;
+    struct Ball *a; // pointer to first ball
+    struct Ball *b; // pointer to second ball (null if wall collision)
     int count; // total collision count at the time of event creation
     // if this count is different from a->count + b->count
     // the the event is invalid
