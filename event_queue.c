@@ -3,7 +3,7 @@
 
 int isInvalid(struct Event e)
 {
-    int count = (e.a ? e.a->count : 0);
+    int count = (e.a ? e.a->count : 0) + (e.b ? e.b->count : 0);
     return count != e.count;
 }
 

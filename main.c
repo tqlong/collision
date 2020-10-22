@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#include <math.h>
 
 #include "draw.h"
 #include "ball.h"
@@ -22,20 +23,56 @@ void processDrawEvent(struct System* s, struct EventQueue* q, SDL_Renderer* rend
 void processVerticalCollisionEvent(struct System* s, struct EventQueue* q, struct Event e)
 {
     e.a->vx = -e.a->vx;
-    e.a->count++;
+    e.a->count++; // increase count to invalidate events created for this ball
     predictBall(e.t, s, q, e.a);
 }
 
 void processHorizontalCollisionEvent(struct System* s, struct EventQueue* q, struct Event e)
 {
     e.a->vy = -e.a->vy;
-    e.a->count++;
+    e.a->count++; // increase count to invalidate events created for this ball
     predictBall(e.t, s, q, e.a);
+}
+
+void processBallCollistionEvent(struct System* s, struct EventQueue* q, struct Event e)
+{
+    // compute new velocities of e.a and e.b
+    struct Ball *a = e.a, *b = e.b;
+    double x = b->x - a->x, y = b->y - a->y;
+    double vx = b->vx - a->vx, vy = b->vy - a->vy;
+    double ra = a->weight * RADIUS_TO_WEIGHT_FACTOR;
+    double rb = b->weight * RADIUS_TO_WEIGHT_FACTOR;
+    double dvdr = vx*x + vy*y;
+    double dist = ra+rb;
+    double magnitude = 2 * a->weight * b->weight * dvdr / ((a->weight + b->weight) * dist);
+    double fx = magnitude * x / dist;
+    double fy = magnitude * y / dist;
+
+    double old_total_energy = (a->vx*a->vx + a->vy*a->vy)*a->weight + (b->vx*b->vx + b->vy*b->vy)*b->weight;
+    double new_total_energy, factor;
+
+    a->vx += fx / a->weight;
+    a->vy += fy / a->weight;
+    b->vx -= fx / b->weight;
+    b->vy -= fy / b->weight;
+
+    // to maintain energy conservation
+    new_total_energy =  (a->vx*a->vx + a->vy*a->vy)*a->weight + (b->vx*b->vx + b->vy*b->vy)*b->weight;
+    factor = sqrt(old_total_energy / new_total_energy);
+    a->vx *= factor;
+    a->vy *= factor;
+    b->vx *= factor;
+    b->vy *= factor;
+
+    e.a->count++; // increase count to invalidate events created for
+    e.b->count++; // the two balls
+    predictBall(e.t, s, q, e.a);
+    predictBall(e.t, s, q, e.b);
 }
 
 void mainLoop(SDL_Window* window, SDL_Renderer* renderer)
 {
-    int n = 10;
+    int n = 100;
     double t = 0;
     struct System s;
     struct EventQueue q;
@@ -71,6 +108,11 @@ void mainLoop(SDL_Window* window, SDL_Renderer* renderer)
         case HORIZONTAL_COLLISION_EVENT:
             processHorizontalCollisionEvent(&s, &q, e);
             break;
+
+        case BALL_COLLISION_EVENT:
+            processBallCollistionEvent(&s, &q, e);
+            break;
+
         default:
             break;
         }

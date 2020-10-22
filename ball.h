@@ -4,6 +4,8 @@
 #include <SDL2/SDL.h>
 
 #define SCREEN_SIZE 640
+#define PIXEL_RADIUS_TO_WEIGHT_FACTOR 20.0
+#define RADIUS_TO_WEIGHT_FACTOR (PIXEL_RADIUS_TO_WEIGHT_FACTOR / SCREEN_SIZE)
 
 struct Ball {
     double x, y;   // 1, 1 <--> W, H, 0, 0 <--> 0, 0

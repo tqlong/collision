@@ -2,6 +2,7 @@
 #include "event_queue.h"
 
 #include <stdlib.h>
+#include <math.h>
 
 void initSystem(struct System* s, int n)
 {
@@ -18,6 +19,11 @@ void initSystem(struct System* s, int n)
         s->balls[i].color.r = rand()%156+100;
         s->balls[i].color.g = rand()%156+100;
         s->balls[i].color.b = rand()%156+100;
+        switch (rand() % 3) {
+            case 0: s->balls[i].color.r = 0; break;
+            case 1: s->balls[i].color.g = 0; break;
+            default: s->balls[i].color.g = 0; break;
+        }
         s->balls[i].color.a = 255;
         s->balls[i].count = 0;
     }
@@ -46,7 +52,7 @@ struct Event getVerticalCollisionEvent(double t, struct Ball* ball)
 {
     struct Event e;
     double dt;
-    double radius = ball->weight * 20 / SCREEN_SIZE;
+    double radius = ball->weight * RADIUS_TO_WEIGHT_FACTOR;
 
     // vertical wall events
     if (ball->vx < 0)
@@ -70,7 +76,7 @@ struct Event getHorizontalCollisionEvent(double t, struct Ball* ball)
 {
     struct Event e;
     double dt;
-    double radius = ball->weight * 20 / SCREEN_SIZE;
+    double radius = ball->weight * RADIUS_TO_WEIGHT_FACTOR;
     // horizontal wall events
     if (ball->vy < 0)
     {
@@ -89,6 +95,21 @@ struct Event getHorizontalCollisionEvent(double t, struct Ball* ball)
     return e;
 }
 
+double getCollisionTime(struct Ball* a, struct Ball* b)
+{
+    double x = b->x - a->x, y = b->y - a->y;
+    double vx = b->vx - a->vx, vy = b->vy - a->vy;
+    double ra = a->weight * RADIUS_TO_WEIGHT_FACTOR;
+    double rb = b->weight * RADIUS_TO_WEIGHT_FACTOR;
+
+    double _b = vx*x + vy*y;
+    double _a = vx*vx + vy*vy;
+    double _c = x*x+y*y - (ra+rb)*(ra+rb);
+    double delta = _b*_b - _a*_c;
+    if (_b > 0 || _a == 0 || delta < 0) return -1;
+
+    return -(_b + sqrt(delta)) / _a;
+}
 
 struct Event getCollisionEvent(double t, struct Ball* a, struct Ball* b)
 {
@@ -102,7 +123,7 @@ struct Event getCollisionEvent(double t, struct Ball* a, struct Ball* b)
     e.count = a->count + b->count;
 
     if (a == b) return e;
-    dt = -1;//getCollisionTime(a, b);
+    dt = getCollisionTime(a, b);
     if (dt >= 0)
     {
         e.type = BALL_COLLISION_EVENT;
@@ -113,9 +134,7 @@ struct Event getCollisionEvent(double t, struct Ball* a, struct Ball* b)
 
 void predictBall(double t, struct System* s, struct EventQueue* q, struct Ball* ball)
 {
-
     addToMinPQ(q, getVerticalCollisionEvent(t, ball));
-
     addToMinPQ(q, getHorizontalCollisionEvent(t, ball));
 
     // ball collision events
@@ -125,7 +144,6 @@ void predictBall(double t, struct System* s, struct EventQueue* q, struct Ball* 
         if (e.type == BALL_COLLISION_EVENT)
             addToMinPQ(q, e);
     }
-
 }
 
 void predictSystem(double t, struct System* s, struct EventQueue* q)
