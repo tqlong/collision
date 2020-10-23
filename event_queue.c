@@ -79,6 +79,8 @@ void sink(struct EventQueue* q, int i)
 
 void addToMinPQ(struct EventQueue* q, struct Event e)
 {
+    if (e.type == NONE_EVENT) return;
+    if (q->n >= QUEUE_CAPACITY-1) return;
     q->events[q->n++] = e;
     swim(q, q->n-1);
 }

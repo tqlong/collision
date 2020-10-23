@@ -3,6 +3,8 @@
 
 #include "ball.h"
 
+#define QUEUE_CAPACITY 10000000
+
 enum EventType
 {
     DRAW_EVENT,
@@ -24,8 +26,6 @@ struct Event
 };
 
 int isInvalid(struct Event e);
-
-#define QUEUE_CAPACITY 100000
 
 struct EventQueue
 {

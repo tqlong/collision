@@ -8,16 +8,27 @@
 #include "ball.h"
 #include "event_queue.h"
 #include "ball_system.h"
+#include "duration.h"
 
 #define DRAW_INTERVAL 0.03
+clock_t last_clock;
 
 void processDrawEvent(struct System* s, struct EventQueue* q, SDL_Renderer* renderer, struct Event e)
 {
+    clock_t now, duration, delay = DRAW_INTERVAL*1000;
+
     addDrawEvent(q, e.t+DRAW_INTERVAL);
 
     drawSystem(s, renderer);
     SDL_RenderPresent(renderer);
-    SDL_Delay( (int)(DRAW_INTERVAL*1000) );
+
+    now = clock();
+    duration = now - last_clock;
+    last_clock = now;
+
+    delay = delay > duration ? delay - duration : 0;
+    SDL_Delay( delay );
+    // SDL_Delay( 1 );
 }
 
 void processVerticalCollisionEvent(struct System* s, struct EventQueue* q, struct Event e)
@@ -72,15 +83,18 @@ void processBallCollistionEvent(struct System* s, struct EventQueue* q, struct E
 
 void mainLoop(SDL_Window* window, SDL_Renderer* renderer)
 {
-    int n = 50;
+    int n = 1000;
     double t = 0;
     struct System s;
     struct EventQueue q;
+    last_clock = clock();
+    tick();
 
     initSystem(&s, n);
     initQueue(&q);
     addDrawEvent(&q, 0);
     predictSystem(0, &s, &q);
+    printf("Init time = %.2f sec q.n = %d\n", tick_tock(), q.n);
 
     SDL_Event event;
     while( 1 )
@@ -90,15 +104,16 @@ void mainLoop(SDL_Window* window, SDL_Renderer* renderer)
         clearScreen(renderer);
 
         struct Event e = deleteMin(&q);
-        printf("event type=%d t=%.5f c=%d q.n=%d\n", e.type, e.t, e.count, q.n);
+        // printf("event type=%d t=%.5f c=%d q.n=%d\n", e.type, e.t, e.count, q.n);
 
         if (isInvalid(e)) continue;
-        step(&s, e.t - t);
+        if (e.type != NONE_EVENT) step(&s, e.t - t);
 
         switch (e.type)
         {
         case DRAW_EVENT:
             processDrawEvent(&s, &q, renderer, e);
+            printf("step time = %.2f sec q.n = %d\n", tick_tock(), q.n);
             break;
 
         case VERTICAL_COLLISION_EVENT:

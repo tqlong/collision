@@ -4,9 +4,11 @@
 #include <SDL2/SDL.h>
 #include "event_queue.h"
 
+#define MAX_BALL 10000
+
 struct System
 {
-    struct Ball balls[100];
+    struct Ball balls[MAX_BALL];
     int n;
 };
 

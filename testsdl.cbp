@@ -49,6 +49,10 @@
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="draw.h" />
+		<Unit filename="duration.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="duration.h" />
 		<Unit filename="event_queue.c">
 			<Option compilerVar="CC" />
 		</Unit>
